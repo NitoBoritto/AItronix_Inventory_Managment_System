@@ -17,7 +17,7 @@ class Shop:
     def inventory(self) -> dict:
         return self._inventory
     
-    def recieve_shipment(self, product, quantity: int):
+    def _recieve_shipment(self, product, quantity: int):
         if quantity <= 0:
             raise NoShipment("Unable to Ship 0 or Negative Values")
         
@@ -33,7 +33,8 @@ class ShowroomShop(Shop):
         """Only Has 1 of Each Product For Showcasing"""
         super().__init__(id, city)
 
-    def recieve_shipment(self, product, quantity: int = 1):
+    def _recieve_shipment(self, product, quantity: int = 1):
+        "Overriding Method for Storing Only 1"
         if product.id in self._inventory and self.inventory[product.id]["Available"] >= 1:
             raise CurrentlyOnDisplay("ShowRoom Currently Has This Product On Display")
         
