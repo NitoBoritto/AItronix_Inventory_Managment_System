@@ -1,36 +1,32 @@
-"""Exception Handling"""
+"""Custom exceptions used by the Samsung inventory manager."""
 
-# Base Errors
+# Base exception for errors related to Samsung inventory operations.
 class InventoryError(Exception):
-    """Base Exception for All Inventory Errors"""
+    """Base exception for all inventory errors."""
     pass
 
+# Base exception for errors related to Samsung shop operations.
 class ShopError(Exception):
-    """Base Exception for All Shop Errors"""
+    """Base exception for all shop errors."""
     pass
 
-class ShippingErrors(Exception):
-    """Base Exception for All Shipping Errors"""
 
-
-# Exceptions
+# Raised when a quantity or product value is below zero.
 class NegativeNumberError(InventoryError):
-    """Raised When There's Negative Values"""
+    """Raised when a numeric value is negative."""
     
+# Raised when code requests a product that is not stored.
 class ProductNotFound(InventoryError):
-    """Raised When Product ID Doesn't Exist"""
+    """Raised when a product ID does not exist."""
     
+# Raised when adding a duplicate product to a warehouse.
 class ProductAlreadyExists(InventoryError):
-    """Raised When Product Already Exists"""
+    """Raised when a product already exists."""
     
-class ShopNotFound(ShopError):
-    """Raised When Shop Doesn't Exist"""
+# Raised when a showroom already displays the requested product.
+class CurrentlyOnDisplay(ShopError):
+    """Raised when a product is already in a showroom."""
     
-class NoShipment(ShippingErrors):
-    """Raised When Quantity Shipped <= 0"""
-    
-class CurrentlyOnDisplay(InventoryError):
-    """Raised When Product Already in a ShowRoom"""
-    
+# Raised when a requested quantity is greater than available stock.
 class OverDraft(InventoryError):
-    """Raised When Quantity Shipped > Quantity in Warehouse"""
+    """Raised when a requested quantity exceeds available stock."""

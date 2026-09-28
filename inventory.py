@@ -1,13 +1,17 @@
-"""Inventory Warehouse"""
-from exceptions import NegativeNumberError, ProductAlreadyExists, ProductNotFound, ShipNothing, NoShipment, OverDraft
+"""Samsung warehouse inventory and product shipment operations."""
+
+from exceptions import ProductAlreadyExists
 from retail_supplier import Shop
 from product import Electronic
+from stock import StockHolder, StockEntry
 
-class Warehouse:
+class Warehouse(StockHolder):
+    """Stores Samsung products centrally and ships them to retail shops."""
+
     def __init__(self, id: str, city: str):
+        super().__init__()
         self._warehouse_id = id
         self._city = city
-        self._stock = {}
     
     @property
     def warehouse_id(self):
@@ -19,58 +23,28 @@ class Warehouse:
         """City Getter"""
         return self._city
         
-    def add_product(self, product: Electronic, quantity: int = 0):
-        if quantity < 0:
-            raise NegativeNumberError("Stock for a Product Can't Be Negative")
-            
-        elif product.id in self._stock:
+    def add_product(self, product: Electronic, qty: int = 0):
+        # A warehouse may register a product only once.
+        if product.id in self:
             raise ProductAlreadyExists(f"Product ID {product.id} Already Exists in Warehouse")
             
-        self._stock[product.id] = {"Item": product,
-                                    "Available": quantity}
+        self._stock[product.id] = StockEntry(product, qty)
 
             
     def check_stock(self, product_id: str):
-        if product_id not in self._stock:
-            raise ProductNotFound(f"Product {product_id} Doesn't Exist in Inventory")
-            
-        print(f'Current Available Stock For "{product_id}": {self._stock[product_id].get("Available")}')
+        # Indexing through StockHolder also validates that the product exists.
+        available_stock = self[product_id].available
+        print(f'Current Available Stock For "{product_id}": {available_stock}')
 
 
-    def add_stock(self, product_id : str, quantity: int = 1):
-        if product_id not in self._stock:
-            raise ProductNotFound(f"Product {product_id} Doesn't Exist in Warehouse")
-        
-        elif quantity < 0:
-            raise NegativeNumberError("Added Quantity Can't Be Negative")
-        
-        self._stock[product_id]["Available"] += quantity
+    def add_stock(self, product_id : str, qty: int = 1):
+        # Delegate quantity validation to the StockEntry object.
+        self[product_id].add(qty)
         print(f"Value Added to {product_id} Successfully")
         
     
-    def ship_to_shops(self, shop: Shop, quantity: int, product: Electronic):
-        if product.id not in self._stock:
-            raise ProductNotFound(f"Product {product.id} Doesn't Exist in Warehouse")
-        
-        elif quantity <= 0:
-            raise NoShipment("Unable to Ship 0 or Negative Values")
-        
-        elif quantity > self._stock[product.id]["Available"]:
-            raise OverDraft("Quantity in Inventory Not Enough for Shippment")
-        
-        self._stock[product.id]["Available"] -= quantity
-        shop._recieve_shipment(product, quantity)
-
-
-    # Dunder/Magic Methods
-    def __len__(self) -> int:
-        return len(self._stock)
-    
-    def __contains__(self, product_id) -> bool:
-        return product_id in self._stock
-    
-    def __getitem__(self, product_id) -> dict:
-        if product_id not in self._stock:
-            raise ProductNotFound(f"Product {product_id} Doesn't Exist in Warehouse")
-        
-        return self._stock[product_id]
+    def ship_to_shops(self, shop: Shop, qty: int, product: Electronic):
+        # Remove stock first; failed removals prevent an incomplete shipment.
+        self[product.id].remove(qty)
+        # Each shop decides how it accepts and stores the shipment.
+        shop._recieve_shipment(product, qty)

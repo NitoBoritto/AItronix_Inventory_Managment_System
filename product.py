@@ -1,9 +1,11 @@
-"""Samsung Products"""
+"""Product models for Samsung electronic devices."""
+
 from exceptions import NegativeNumberError
 
 # Base Classes
 class Electronic:
-    """Base Class"""
+    """Base product containing the shared ID and name fields."""
+
     def __init__(self, id: str, name: str):
         self._id = id
         self.name = name
@@ -15,9 +17,10 @@ class Electronic:
 
 
 class ScreenQuality:
-    """Composition Class"""
+    """Composable screen feature shared by products with displays."""
+
     def __init__(self, is_oled: bool = False):
-        self._oled = is_oled
+        self._is_oled = is_oled
 
     @property
     def is_oled(self) -> bool:
@@ -26,7 +29,8 @@ class ScreenQuality:
 
 
 class HomeAppliance(Electronic):
-    """2nd Level Class"""
+    """Electronic device that uses power and may be smart-enabled."""
+
     def __init__(self, id: str, name: str, wattage: int, smart: bool = True):
         super().__init__(id, name)
         self.wattage = wattage
@@ -38,6 +42,7 @@ class HomeAppliance(Electronic):
 
     @wattage.setter
     def wattage(self, val: int):
+        # Reject invalid power values before storing them.
         if val < 0:
             raise NegativeNumberError("Wattage Can't be Negative")
         else:
@@ -45,7 +50,8 @@ class HomeAppliance(Electronic):
 
 
 class Portable(Electronic):
-    """2nd Level Class"""
+    """Electronic device powered by a battery."""
+
     def __init__(self, id: str, name: str, battery: int):
         super().__init__(id, name)
         self.battery = battery
@@ -56,6 +62,7 @@ class Portable(Electronic):
         
     @battery.setter
     def battery(self, val: int):
+        # Battery capacity cannot be negative.
         if val < 0:
             raise NegativeNumberError("Battery Can't be Negative")
         else:
@@ -66,7 +73,8 @@ class Portable(Electronic):
 
 # Products
 class Phone(Portable):
-    """Inherits from Portable and ScreenQuality as Compo"""
+    """Portable phone with memory specifications and screen information."""
+
     def __init__(self, id : str, name : str, battery : int, ram : int, storage : int, is_oled : bool = False):
         super().__init__(id, name, battery)
         self._ram = ram
@@ -83,7 +91,8 @@ class Phone(Portable):
 
 
 class Tv(HomeAppliance):
-    """Inherits from HomeAppliance as main and ScreenQuality as Compo"""
+    """Home appliance with a screen-quality component."""
+
     def __init__(self, id : str, name : str, wattage : int, smart : bool = True, is_oled : bool = False):
         super().__init__(id, name, wattage, smart)
         self.screen = ScreenQuality(is_oled)
@@ -91,7 +100,8 @@ class Tv(HomeAppliance):
 
 
 class Watch(Portable):
-    """Inherits from Portable as main"""
+    """Portable wearable device with an optional fitness sensor."""
+
     def __init__(self, id : str, name : str, battery : int, fitnessSensor : bool = True):
         super().__init__(id, name, battery)
         self.fitnessSensor = fitnessSensor
@@ -99,7 +109,8 @@ class Watch(Portable):
 
 
 class Fridge(HomeAppliance):
-    """Inherits from HomeAppliance as main"""
+    """Home appliance with an optional ice dispenser."""
+
     def __init__(self, id : str, name : str, wattage : int, smart : bool = True, iceDispenser : bool = False):
         super().__init__(id, name, wattage, smart)
         self.iceDispenser = iceDispenser
